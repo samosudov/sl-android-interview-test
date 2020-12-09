@@ -7,7 +7,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 import work.samosudov.sltestapp.data.repository.DatabaseRepository
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -18,7 +17,6 @@ class MapViewModel @Inject constructor(
 
     val coordinateResult = MutableLiveData<LatLng>()
     val serviceCoordinateResult = MutableLiveData<LatLng>()
-    private val valve: BehaviorSubject<Boolean> = BehaviorSubject.create()
     private val subscriptions = CompositeDisposable()
 
     init {
@@ -51,10 +49,6 @@ class MapViewModel @Inject constructor(
                     }
                 )
         )
-    }
-
-    fun switchStream(isOn: Boolean) {
-        valve.onNext(isOn)
     }
 
     override fun onCleared() {
