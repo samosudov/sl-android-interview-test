@@ -17,6 +17,7 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     val coordinateResult = MutableLiveData<LatLng>()
+    val serviceCoordinateResult = MutableLiveData<LatLng>()
     private val valve: BehaviorSubject<Boolean> = BehaviorSubject.create()
     private val subscriptions = CompositeDisposable()
 
@@ -24,7 +25,7 @@ class MapViewModel @Inject constructor(
         subscribeOnCoordinates()
     }
 
-    fun subscribeOnCoordinates() {
+    private fun subscribeOnCoordinates() {
         subscriptions.add(
             databaseRepository
                 .getCoordinate()
@@ -34,17 +35,16 @@ class MapViewModel @Inject constructor(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext {
-//                    coordinateResult.value = LatLng(it.lat, it.lng)
-                    println("subscribeOnCoordinates 5 = ${it.id}")
+                    coordinateResult.value = LatLng(it.lat, it.lng)
                 }
                 .buffer(3)
                 .map { it.last() }
                 .doOnNext {
-                    println("subscribeOnCoordinates 15 = ${it.id}")
+                    serviceCoordinateResult.value = LatLng(it.lat, it.lng)
                 }
                 .subscribe(
                     {
-//                        coordinateResult.value = LatLng(it.lat, it.lng)
+                        println("subscribeOnCoordinates subscribe =${it}")
                     },
                     {
                         println("subscribeOnCoordinates error =${it.message}")

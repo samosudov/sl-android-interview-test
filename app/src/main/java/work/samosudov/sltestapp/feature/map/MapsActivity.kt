@@ -1,16 +1,18 @@
 package work.samosudov.sltestapp.feature.map
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import work.samosudov.sltestapp.R
 import work.samosudov.sltestapp.SlTestApplication
+import work.samosudov.sltestapp.feature.service.CoordinateService
 import javax.inject.Inject
 
 
@@ -20,6 +22,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mapViewModel: MapViewModel
 
     private lateinit var googleMap: GoogleMap
+    private lateinit var markerPosition: Marker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +35,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        //TODO:: stop service if it started
+        stopService(Intent(this, CoordinateService::class.java))
     }
 
     private fun initView() {
         setContentView(R.layout.activity_maps)
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -45,7 +48,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun subscribeUi() {
         mapViewModel.coordinateResult.observe(this, {
-            googleMap.addMarker(MarkerOptions().position(it))
+            if (::markerPosition.isInitialized) {
+                markerPosition.position = it
+            } else {
+                markerPosition = googleMap.addMarker(MarkerOptions().position(it))
+            }
+
             println("MapsActivity coordinateResult=$it")
         })
     }
@@ -61,7 +69,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        mapViewModel.switchStream(false)
-        //TODO: 1. start service;
+        startService(Intent(this, CoordinateService::class.java))
     }
 }
